@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Noto Sans", ui-sans-serif, system-ui, sans-serif;
+    --r-main-color: 36,31,53;
+}
+
+h1 {
+    color: rgba(var(--r-main-color), 1);
+    text-shadow: 1px 1px 10px #fff, 1px 1px 10px #ccc;
+    text-align: center;
+    font-size: 3em;
+}
+
+.main {
+    text-align: center;
+
+    color: #e4e2e2;
+
+    img {
+        border-radius: 50%;
+    }
+
+    .card {
+        padding: 1em;
+        background: linear-gradient(rgba(var(--r-main-color), 0.8) 100%);
+        width: 300px;
+        height: 300px;
+        border-radius: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .github {
+        animation: wiggle 8s ease-in-out infinite -0s;
+    }
+
+    .feedback {
+        animation: wiggle2 8s ease-in-out infinite -0.8s;
+    }
+
+    .avatar {
+        animation: wiggle2 8s ease-in-out infinite -2.4s;
+    }
+
+    .onepoint {
+        animation: wiggle 8s ease-in-out infinite -3.2s;
+    }
+
+    a {
+        text-decoration: none;
+        color: aliceblue;
+    }
+
+    .links {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 75%;
+        margin: auto;
+
+        a {
+            width: fit-content;
+            height: fit-content;
+            margin: auto;
+            margin-top: 3rem;
+        }
+    }
+}
+
+
+/* Dessin et animation */
+html {
+    height: 100%;
+    background-image:
+        url("../images/title.jpg"),
+        linear-gradient(rgba(255, 255, 255, 0.6));
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-blend-mode: lighten;
+
+
+}
+
+.stars-1,
+.stars-2,
+.stars-3 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: transparent;
+    z-index: 900;
+}
+
+.stars-1 {
+    width: 0.15rem;
+    height: 0.15rem;
+    box-shadow: 47vw 88vh #fff, 48vw 82vh #fff, 65vw 88vh #fff, 88vw 91vh #fff,
+    12vw 45vh #fff, 25vw 28vh #fff, 72vw 65vh #fff, 95vw 15vh #fff,
+    5vw 75vh #fff, 35vw 92vh #fff, 15vw 15vh #fff, 85vw 45vh #fff;
+    animation: twinkle 3s ease-in-out infinite;
+}
+
+.stars-2 {
+    width: 0.2rem;
+    height: 0.2rem;
+    box-shadow: 52vw 88vh #fff, 12vw 96vh #fff, 83vw 92vh #fff, 93vw 94vh #fff,
+    42vw 68vh #fff, 62vw 35vh #fff, 82vw 15vh #fff, 22vw 52vh #fff,
+    32vw 78vh #fff, 92vw 25vh #fff, 8vw 35vh #fff, 68vw 75vh #fff;
+    animation: twinkle 3s ease-in-out infinite -1s;
+}
+
+.stars-3 {
+    width: 0.18rem;
+    height: 0.18rem;
+    box-shadow: 58vw 91vh #fff, 58vw 67vh #fff, 93vw 87vh #fff, 28vw 48vh #fff,
+    38vw 28vh #fff, 78vw 85vh #fff, 48vw 12vh #fff, 18vw 82vh #fff,
+    88vw 42vh #fff, 8vw 92vh #fff, 75vw 32vh #fff, 65vw 62vh #fff;
+    animation: twinkle 3s ease-in-out infinite -2s;
+}
+
+@keyframes twinkle {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.2;
+    }
+}
+
+@keyframes float {
+    100% {
+        offset-distance: 100%;
+    }
+}
+
+@keyframes rotate {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes wiggle {
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    25% {
+        transform: translateY(-5px) rotate(2deg);
+    }
+    75% {
+        transform: translateY(5px) rotate(-2deg);
+    }
+}
+
+@keyframes wiggle2 {
+    0%,
+    100% {
+        transform: translateY(0) rotate(2deg);
+    }
+    50% {
+        transform: translateY(-10px) rotate(-1deg);
+    }
+}
+
+/* Responsive mobile */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 1.5em;
+        padding: 0 1rem;
+    }
+
+    .main .links {
+        grid-template-columns: repeat(2, 1fr);
+        width: 95%;
+        gap: 0.5rem;
+    }
+
+    .main .links a {
+        margin-top: 1rem;
+    }
+
+    .main .card {
+        width: 150px;
+        height: 150px;
+        padding: 0.5em;
+    }
+
+    .main .card img {
+        max-width: 60%;
+    }
+
+    .main .card p {
+        margin: 0.5em 0 0 0;
+        font-size: 0.9em;
+    }
+
+    html {
+        background-position: center;
+        background-attachment: fixed;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.2em;
+    }
+
+    .main .card {
+        width: 120px;
+        height: 120px;
+    }
+
+    .main .card img {
+        max-width: 50%;
+    }
+}
