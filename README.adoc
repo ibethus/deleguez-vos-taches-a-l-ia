@@ -1,0 +1,37 @@
+= Input here your presentation name
+
+Readable version available on https://<git_user>.github.io/<repository_name>/[Github Pages -> here]
+
+== Slides
+=== Generate
+
+[source%linenums,bash]
+----
+cd slides
+
+# Generates qrcode that link to talk home
+./qrcode.java -o slides/images/qr_home.svg https://jtama.github.io/oop-to-dop/home.html
+----
+
+=== Run locally
+
+[source%linenums,bash]
+----
+# Only once to retrieve js/css dependencies
+./setup.sh
+
+podman container run --name prez --rm -d -p 8080:80 -v $(pwd)/slides:/usr/share/nginx/html nginx
+
+# Only if you need a coder for your slides
+podman container run --name coder --rm -d -p 8443:8443 -v $(pwd):/config/workspace -v ~/.m2:/config/.m2 -e MAVEN_CONFIG=/config/.m2 ghcr.io/jtama/java_jbang_codeserver:latest
+----
+
+=== Adaptation
+
+The following must of course be adapted for each talk/event/speaker.
+
+* slides/images/avatar.png
+* slides/images/event.svg
+* slides/images/github-avatar.png
+* slides/images/title.png
+* slides/intro.adoc#Who am I ?

@@ -1,0 +1,28 @@
+[%notitle.transparency]
+== Intro
+
+[%notitle.columns.is-vcentered.transparency.blur-background]
+=== Who am I ?
+
+image::qui-est-ce.webp[background, size=cover]
+
+[.column.is-one-third]
+--
+image::avatar.png[]
+--
+
+[.column.is-3.has-text-left.medium]
+--
+Jérôme
+
+Tech Lead/Architecte, Compagnon du devoir
+--
+
+[.column]
+--
+[.vertical-align-middle]
+image:logo_onepoint.png[]
+
+[.vertical-align-middle]
+icon:github[] @jtama image:github-avatar.png[width=100]
+--

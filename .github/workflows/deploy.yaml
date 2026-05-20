@@ -1,0 +1,46 @@
+name: Build and deploy latest version
+
+on:
+  push:
+    branches:
+      - '*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️ 👉
+        uses: actions/checkout@v4
+
+      - name: Install required dependencies
+        run: ./setup.sh
+
+      - name: Install and Build 🔧
+        uses: addnab/docker-run-action@v3
+        with:
+          image: asciidoctor/docker-asciidoctor:1.80.0
+          options: -v ${{ github.workspace }}/slides:/documents
+          run: asciidoctor-revealjs -r asciidoctor-diagram /documents/index.adoc
+
+      - name: Copy build to folder 📦
+        run: |
+          cd slides && \
+          BUILD_PATH=${{ github.ref_name == 'main' && 'build' || format('build/{0}', github.ref_name) }} && \
+          mkdir -p $BUILD_PATH/reveal.js/dist && \
+          cp -r favicon.svg *.html images css highlight.js $BUILD_PATH/ && \
+          cp -r reveal.js/dist/* $BUILD_PATH/reveal.js/dist/ && \
+          cp -r reveal.js/plugin $BUILD_PATH/reveal.js/
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        with:
+          folder: slides/build
+          branch: gh-pages
+          clean: false
