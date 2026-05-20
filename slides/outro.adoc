@@ -1,11 +1,7 @@
-[%notitle.transparency]
-== Outro
+== Conclusion
 
 [.transparency.no-transition]
 === Merci !
 
-image::title.jpg[background, size=cover]
+image::home.png[background, size=cover]
 image:qr_home.svg[alt="https://jtama.github.io/oop-to-dop/home.html", width=400]
-
-[.small]
-Photo by Fons Heijnsbroek on Unsplash

@@ -1,4 +1,3 @@
-= Nice talk title
 :docinfo: private
 :source-highlighter: highlight.js
 :highlightjsdir: highlight.js
@@ -11,12 +10,14 @@
 :revealjs_history: true
 :revealjs_pdfseparatefragments: false
 :revealjs_width: 1200
-:title-slide-background-image: title.jpg
+:title-slide-background-image: home.png
 :title-slide-background-size: cover
 :title-slide-background-repeat: no-repeat
 :title-slide-background-opacity: 0.5
 :customcss: css/slides.css
 :imagesdir: images
+
+= Déléguez vos tâches à faible valeur ajoutée à l'IA
 
 include::intro.adoc[]
 // your content here

@@ -4,7 +4,7 @@
 
 :root {
     --r-background-color: #EEEEEE;
-    --r-main-color: #111012;
+    --r-main-color: #525252;
     --r-main-font: 'Noto sans';
     --r-heading-color: #222333;
     --r-link-color: #8FAADC;
@@ -12,28 +12,16 @@
 }
 
 body {
-    /* Footer styles for devfest-logo if body has .title */
-
-    &.title footer:has(.event-logo) {
-        z-index: 10;
-        position: absolute;
-        left: 35%;
-        bottom: 0;
-        min-height: 80px;
-        text-align: center;
-        width: 600px;
-        padding: 2em;
-    }
 
     /* Footer styles for onepoint-logo if body does not have .present.demo or .title */
 
-    &:not(:has(.present.demo)):not(.title) footer:has(.onepoint-logo) {
+    footer:has(.onepoint-logo) {
         z-index: 10;
         position: absolute;
         left: 0;
         width: 100%;
         bottom: 0;
-        min-height: 80px;
+        height: 10rem;
         text-align: center;
     }
 
@@ -67,16 +55,12 @@ body {
         }
 
         h2 {
-            --r-heading-color: #000000;
+            --r-heading-color: #464646;
             position: fixed;
             left: 50%;
             top: 6px;
             transform: translateX(-50%);
             width: 100%;
-        }
-
-        ul {
-            list-style-type: none;
         }
 
         .progress {
@@ -96,7 +80,7 @@ body {
 
     .big {
         font-size: 60px;
-        color: #012d3f;
+        color: #00415a;
     }
 
     img {
@@ -113,7 +97,7 @@ body {
     .important-text > * {
         font-size: xxx-large;
         font-weight: bold;
-        color: #012d3f;
+        color: #5c5c5c;
     }
 
     .small {
@@ -136,9 +120,6 @@ body {
         filter: blur(4px);
     }
 
-    li {
-        list-style-type: none;
-    }
 
     audio {
         display: none;
