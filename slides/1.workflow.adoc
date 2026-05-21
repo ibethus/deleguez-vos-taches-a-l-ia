@@ -1,0 +1,26 @@
+== Workflow
+
+[.notes]
+--
+Présenter ici les spécificités de workflow de travail, en insistant sur son caractère industrialisé.
+--
+
+[transition=fade]
+=== Quelques étapes (IA)
+
+[.step]
+* 📋 *Board Jira* (Sélectionner et mettre à jour le ticket)
+* 🌿 *Git* (Créer une branche & worktree)
+* 💻 *Développement*
+* ✅ *Tests et Qualité* (Sonar)
+* 🔄 *Commit & Push*
+* 🔀 *Merge Request*
+
+[transition=fade]
+=== Quelques étapes (Pas IA)
+--
+[.step]
+* 👀 *Review*
+* ✨ *Merge* 
+
+--

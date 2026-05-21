@@ -1,6 +1,4 @@
-= Input here your presentation name
-
-Readable version available on https://<git_user>.github.io/<repository_name>/[Github Pages -> here]
+= Déléguez vos tâches à faible valuer ajoutée à l'IA
 
 == Slides
 === Generate
@@ -20,6 +18,10 @@ cd slides
 # Only once to retrieve js/css dependencies
 ./setup.sh
 
+# Generate the slides
+docker run --rm -v $(pwd -W):/documents asciidoctor/docker-asciidoctor asciidoctor-revealjs index.adoc
+
+# Serve the homepage
 podman container run --name prez --rm -d -p 8080:80 -v $(pwd)/slides:/usr/share/nginx/html nginx
 
 # Only if you need a coder for your slides

@@ -11,7 +11,7 @@
 [%notitle.columns.is-vcentered.transparency.blur-background]
 === Who am I ?
 
-image::qui-est-ce.webp[background, size=cover]
+image::home.png[background, size=cover]
 
 [.column.is-one-third]
 --
@@ -20,7 +20,7 @@ image::whoami.jpeg[]
 
 [.column.is-3.has-text-left.medium]
 --
-Ivan
+Ivan Béthus
 
 Tech Lead Java/Angular
 --

@@ -26,8 +26,11 @@ body {
     }
 
     .reveal {
+        p {
+            font-size: 2rem;
+        }
         h1 {
-            --r-heading1-size: 82px;
+            --r-heading1-size: 60px;
             color: var(--r-heading-color);
             text-shadow: 1px 1px 10px #fff, 1px 1px 10px #ccc;
             position: fixed;
@@ -79,7 +82,7 @@ body {
     }
 
     .big {
-        font-size: 60px;
+        font-size: 45px;
         color: #00415a;
     }
 
@@ -95,7 +98,7 @@ body {
     }
 
     .important-text > * {
-        font-size: xxx-large;
+        font-size: xx-large;
         font-weight: bold;
         color: #5c5c5c;
     }
@@ -105,7 +108,7 @@ body {
     }
 
     .medium {
-        font-size: 38px;
+        font-size: 28px;
     }
 
     .column.has-text-right > div > div.hdlist.small > table {

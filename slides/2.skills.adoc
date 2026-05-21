@@ -1,0 +1,99 @@
+== Skills
+
+[.notes]
+--
+Les skills IA sont un concept fondamental pour industrialiser et scaler le travail avec les agents IA (aka LLMs).
+Elles permettent de packager du domaine-spécifique et du savoir-faire.
+Rappeler que les IA sont stateless et que donc tout le contexte est renvoyé à chaque fois. 
+--
+
+
+=== Qu'est-ce qu'une Skill ?
+
+Un fichier markdown qui oriente le LLM vers une certaine façon de procéder :
+
+[.step]
+* *Découvrable* et *documentée* pour l'IA
+* Focalise l'IA sur un *domaine spécifique*
+
+[.notes]
+--
+Techniquement, ça ne donne pas de "nouvelles capacités" au modèle
+--
+
+[.notitle]
+=== !
+
+Les skills sont à placer au niveau projet (versionnable) ou global :
+
+[source, bash]
+----
+mon_projet OU ~/
+├─ .agent/
+│  ├─ skills/
+│  │  ├─ tmux_skill/
+│  │  │  ├─ SKILL.md
+│  │  │  ├─ scripts/
+│  │  │  │  ├─ un_script.sh
+----
+
+
+=== À quoi servent les Skills ?
+
+[.step]
+* 🚀 *Accélérer* les agents IA sur des tâches précises
+* 📖 Fournir une *base de connaissances* structurée
+* 🔄 *Standardiser* les approches et patterns
+* 🧠 Améliorer la *qualité* des réponses de l'IA
+
+[%auto-animate]
+=== Composants d'une Skill efficace
+
+[.step]
+* *Titre clair* : quelques mots décrivant précisément la skill
+* *Description courte* : Contexte et cas d'usage
+* *When to use* : Quand la skill s'applique
+* *When NOT to use* : Limites et exceptions importantes
+* *Instructions détaillées* : Étapes concrètes et éprouvées
+* *Exemples* : Code, patterns ou résultats attendus
+
+[%auto-animate.notitle]
+=== !
+
+WARNING: Le tout doit rester **concis** pour ne pas surcharger le contexte. 
+
+
+=== Skills vs MCP
+
+[%step]
+* ✅ *Plus flexibles* S'adaptent au contexte et au style
+* ✅ *Versionnables* : Évolution du savoir-faire
+* ✅ *Documentables* : Facile à maintenir et partager
+* ✅ *Itératives* : Améliorées rapidement par l'usage
+* ✅ *Économes* : Moins consommateurs de token (en général)
+* ❌ *Non-déterministes* : Pas d'appel de méthode, comme les MCP    
+* ❌ *Moins complètes* : Fonctionnalités moins avancées (accès BDD, LSP...)
+
+
+=== Exemple
+
+[source, markdown]
+----
+---
+name : tmux-session
+description: Démarrer une session tmux
+---
+
+# Instructions
+
+**Créer et démarrer une session tmux*** :
+```bash
+tmux new -t agent-session
+```
+
+**Exécuter des commandes dans cette session** :
+```bash
+tmux send-keys -t agent-session "${ma_commande}" Enter
+```
+----
+
