@@ -50,7 +50,7 @@ mon_projet OU ~/
 === Composants d'une Skill efficace
 
 [.step]
-* *Titre clair* : quelques mots décrivant précisément la skill
+* *Titre clair* : quelques mots (max 64 char) décrivant précisément la skill
 * *Description courte* : Contexte et cas d'usage
 * *When to use* : Quand la skill s'applique
 * *When NOT to use* : Limites et exceptions importantes
@@ -60,7 +60,7 @@ mon_projet OU ~/
 [%auto-animate.notitle]
 === !
 
-WARNING: Le tout doit rester **concis** pour ne pas surcharger le contexte. 
+WARNING: Le tout doit rester **concis** pour ne pas surcharger le contexte.
 
 
 === Skills vs MCP
