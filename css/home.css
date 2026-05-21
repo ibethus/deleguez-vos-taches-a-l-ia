@@ -5,11 +5,13 @@ body {
     padding: 0;
     font-family: "Noto Sans", ui-sans-serif, system-ui, sans-serif;
     --r-main-color: 36,31,53;
+    background-color: #000000;
+    min-height: 100vh;
 }
 
 h1 {
-    color: rgba(var(--r-main-color), 1);
-    text-shadow: 1px 1px 10px #fff, 1px 1px 10px #ccc;
+    color: #ffffff;
+    text-shadow: none;
     text-align: center;
     font-size: 3em;
 }
@@ -21,11 +23,14 @@ h1 {
 
     img {
         border-radius: 50%;
+        max-width: 80%;
+        max-height: 80%;
+        object-fit: contain;
     }
 
     .card {
         padding: 1em;
-        background: linear-gradient(rgba(var(--r-main-color), 0.8) 100%);
+        background: transparent;
         width: 300px;
         height: 300px;
         border-radius: 100%;
@@ -57,16 +62,17 @@ h1 {
     }
 
     .links {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        width: 75%;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 2rem;
+        width: 90%;
         margin: auto;
 
         a {
             width: fit-content;
             height: fit-content;
-            margin: auto;
-            margin-top: 3rem;
+            margin-top: 2rem;
         }
     }
 }
@@ -75,13 +81,6 @@ h1 {
 /* Dessin et animation */
 html {
     height: 100%;
-    background-image:
-        linear-gradient(rgba(255, 255, 255, 0.6));
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-blend-mode: lighten;
-
-
 }
 
 .stars-1,
