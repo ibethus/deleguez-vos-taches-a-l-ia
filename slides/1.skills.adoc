@@ -67,13 +67,12 @@ WARNING: Le tout doit rester **concis** pour ne pas surcharger le contexte.
 
 [%step]
 * ✅ *Plus flexibles* S'adaptent au contexte et au style
-* ✅ *Versionnables* : Évolution du savoir-faire
+* ✅ *Versionnables* : Évolution du savoir-faire au sein d'un projet
 * ✅ *Documentables* : Facile à maintenir et partager
 * ✅ *Itératives* : Améliorées rapidement par l'usage
 * ✅ *Économes* : Moins consommateurs de token (en général)
 * ❌ *Non-déterministes* : Pas d'appel de méthode, comme les MCP    
 * ❌ *Moins complètes* : Fonctionnalités moins avancées (accès BDD, LSP...)
-
 
 === Exemple
 
@@ -81,7 +80,7 @@ WARNING: Le tout doit rester **concis** pour ne pas surcharger le contexte.
 ----
 ---
 name : tmux-session
-description: Démarrer une session tmux
+description: Démarrer et utiliser une session tmux
 ---
 
 # Instructions

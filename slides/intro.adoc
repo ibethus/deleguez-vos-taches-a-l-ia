@@ -1,8 +1,8 @@
 == Programme
 
 [%step]
-* Workflow IA local 
 * Skills : quoi, comment et pourquoi
+* Workflow IA local 
 * Choisir son agent de code
 * Configuration
 * Orchestration

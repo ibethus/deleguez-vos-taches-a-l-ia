@@ -20,6 +20,6 @@
 = Déléguez vos tâches à faible valeur ajoutée à l'IA
 
 include::intro.adoc[]
-include::1.workflow.adoc[]
-include::2.skills.adoc[]
+include::1.skills.adoc[]
+include::2.workflow.adoc[]
 include::outro.adoc[]
