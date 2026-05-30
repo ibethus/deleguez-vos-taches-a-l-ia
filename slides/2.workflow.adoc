@@ -27,6 +27,7 @@ Présenter ici les spécificités de workflow de travail, en insistant sur son c
 
 === Trois skills - un Prompt
 
+[%auto-animate]
 === Forge
 
 [source, markdown]
@@ -36,7 +37,33 @@ name: forge-github
 description: Use GitHub as a software forge for the project
 ---
 ----
+[%auto-animate]
+=== Forge
 
+* `🧭 How to Use This Skill (READ THIS FIRST)`
+* **CLI:** `gh` + `git`
+
+[%auto-animate]
+=== Forge
+
+[source, markdown]
+----
+### 6. Create pull request
+```bash
+sops exec-env .agent/secrets.enc.yaml 'gh pr create \
+  --title "feat(scope): description of the change" \
+  --body-file /tmp/pr-body.md \
+  --base main'
+```
+
+### 8. List open PRs
+
+```bash
+sops exec-env .agent/secrets.enc.yaml 'gh pr list --state open'
+```
+----
+
+[%auto-animate]
 === Project management
 
 [source, markdown]
@@ -47,6 +74,18 @@ description: Use GitHub Issues + Projects as a ticket manager for the project
 ---
 ----
 
+[%auto-animate]
+=== Project management
+[source, markdown]
+----
+### 2. Show ticket details
+
+```bash
+sops exec-env .agent/secrets.enc.yaml 'gh issue view ISSUE_NUMBER --comments'
+```
+----
+
+[%auto-animate]
 === SOPS
 [source, markdown]
 ----
@@ -56,7 +95,15 @@ description: Encrypted secrets management using SOPS + age
 ---
 ----
 
-=== Prompt d'intégration
+[%auto-animate]
+=== SOPS
+
+> SOPS est un éditeur de fichiers chiffrés prenant en charge les formats YAML, JSON, ENV, INI et BINARY et chiffrant avec AWS KMS, GCP KMS, Azure Key Vault, HuaweiCloud KMS, age et PGP. 
+
+https://sops.talks.sylvain.dev/[Conférence de Sylvain Métayer : SOPS, passez un savon à vos secrets en clair ! ]
+
+[%auto-animate]
+=== Prompt "d'orchestration"
 [source, markdown]
 ----
 ---
@@ -65,3 +112,22 @@ description: workflow describing how to implement a ticket, given its number
 argument-hint: "<ticket-id>"
 ---
 ----
+
+[%auto-animate]
+=== Prompt "d'orchestration"
+[source, markdown]
+----
+Pre-flight Checklist
+Step 1 — Fetch Ticket Details
+Step 2 — Update Ticket to "In Progress" & Assign
+Step 3 — Create Branch
+Step 4 — Implement the Feature
+Step 5 — Commit with Conventional Commits
+Step 6 — Push
+Step 7 — Create Pull Request
+Step 8 — Update Ticket with PR Link and Testing Instructions
+Step 9 — Cleanup
+Step 10 — Summary
+----
+
+=== Démo time !

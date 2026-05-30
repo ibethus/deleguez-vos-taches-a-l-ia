@@ -33,20 +33,15 @@ body {
             --r-heading1-size: 60px;
             color: var(--r-heading-color);
             text-shadow: 1px 1px 10px #fff, 1px 1px 10px #ccc;
-            position: fixed;
-            left: 28px;
             width: 100%;
             text-align: center;
         }
 
-        .title.present h2 {
-            position: fixed;
-            top: 208px;
-            left: 630px;
+        h2 {
+            --r-heading-color: #464646;
             width: 100%;
-            font-family: var(--r-main-font);
-            text-shadow: -1px 0 #000000, 0 1px #000000, 1px 0 #000000, 0 -1px #000000;
-            text-transform: none;
+            text-align: center;
+            margin-top: 0.5em;
         }
 
         .to-the-bottom {
@@ -55,15 +50,6 @@ body {
             bottom: 20px;
             transform: translate(-50%, -50%);
             margin: 0 auto;
-        }
-
-        h2 {
-            --r-heading-color: #464646;
-            position: fixed;
-            left: 50%;
-            top: 6px;
-            transform: translateX(-50%);
-            width: 100%;
         }
 
         .progress {
