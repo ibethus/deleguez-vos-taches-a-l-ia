@@ -5,8 +5,7 @@
 * Workflow IA local 
 * Choisir son agent de code
 * Configuration
-* Orchestration
-* Aller plus loin
+* Automatisation
 
 [%notitle.columns.is-vcentered.transparency.blur-background]
 === Who am I ?

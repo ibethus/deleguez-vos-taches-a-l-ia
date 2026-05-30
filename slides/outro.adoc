@@ -1,5 +1,3 @@
-== Conclusion
-
 [.transparency.no-transition]
 === Merci !
 
