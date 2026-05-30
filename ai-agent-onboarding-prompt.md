@@ -87,7 +87,22 @@ description: `{what is the skill about}`
 
 **CLI:** `{cli-name}`
 **Homepage:** `{url}`
-**Authentication:** via environment variable `{ENV_VAR}` sourced from encrypted SOPS file (see `.agent/secrets.yaml`).
+**Authentication:** via environment variable `{ENV_VAR}` sourced from encrypted SOPS file (see `.agent/secrets.enc.yaml`).
+**Token scopes required:** `{scope1}`, `{scope2}` (e.g., `repo`, `read:org`, `project` for GitHub)
+
+> 🔐 **All commands require SOPS.** Run from the project root. Encrypted secrets at `.agent/secrets.enc.yaml`.
+> **SOPS quoting rule:** Always use **single quotes** `'...'` for the command inside `sops exec-env`. If you need dynamic values (like ticket ID or variables), write them to a temp file and use `--body-file`.
+> **NEVER use double quotes** around the `sops exec-env` command string — nested variable expansion inside `sops exec-env` is error-prone and will break.
+
+---
+
+## 🧭 How to Use This Skill (READ THIS FIRST)
+
+1. **Read this entire file** before executing any operations.
+2. Every command that needs credentials **must** be wrapped with `sops exec-env .agent/secrets.enc.yaml '...'`.
+3. If any command exits with a non-zero code → **STOP**, read the error, and report it. Do NOT skip failures or simulate success.
+4. Do NOT edit files inside `themes/` — they are git submodules. Do NOT use `sudo`.
+5. **Never** log or display the contents of decrypted secrets.
 
 ---
 
@@ -148,7 +163,21 @@ description: Use Jira as a ticket manager for the project
 
 **CLI:** `jira`
 **Configuration file:** `~/.jira.d/config.yml`
-**Authentication:** via environment variable `JIRA_API_TOKEN` sourced from encrypted SOPS file.
+**Homepage:** https://github.com/go-jira/jira
+**Authentication:** via environment variable `JIRA_API_TOKEN` sourced from encrypted SOPS file (see `.agent/secrets.enc.yaml`).
+**Token scopes required:** (Jira API token with write access)
+
+> 🔐 **All commands require SOPS.** Run from the project root. Encrypted secrets at `.agent/secrets.enc.yaml`.
+
+---
+
+## 🧭 How to Use This Skill (READ THIS FIRST)
+
+1. **Read this entire file** before executing any operations.
+2. Every command that needs credentials **must** be wrapped with `sops exec-env .agent/secrets.enc.yaml '...'`.
+3. If any command exits with a non-zero code → **STOP**, read the error, and report it. Do NOT skip failures or simulate success.
+4. Do NOT edit files inside `themes/` — they are git submodules. Do NOT use `sudo`.
+5. **Never** log or display the contents of decrypted secrets.
 
 ---
 
@@ -167,44 +196,51 @@ jira init
 ### 1. List my open tickets
 
 ```bash
-jira list --query "assignee = currentUser() AND status != Done AND status != Closed"
+sops exec-env .agent/secrets.enc.yaml 'jira list --query "assignee = currentUser() AND status != Done AND status != Closed"'
 ```
 
 ### 2. Show ticket details
 
 ```bash
-jira view PROJ-1234
+sops exec-env .agent/secrets.enc.yaml 'jira view PROJ-1234'
 ```
 
 ### 3. Update ticket status
 
 ```bash
 # First check available transitions
-jira transitions PROJ-1234
+sops exec-env .agent/secrets.enc.yaml 'jira transitions PROJ-1234'
 
 # Then execute the transition
-jira trans "In Progress" PROJ-1234
+sops exec-env .agent/secrets.enc.yaml 'jira trans "In Progress" PROJ-1234'
 ```
 
 ### 4. Assign ticket to user
 
 ```bash
-jira assign PROJ-1234 "$JIRA_USERNAME"
+sops exec-env .agent/secrets.enc.yaml "jira assign PROJ-1234 ${JIRA_USERNAME}"
 ```
 
 ### 5. Add comment to ticket
 
+Use a temp file for multi-line body to avoid shell quoting issues:
+
 ```bash
-jira comment PROJ-1234 -m "## Testing instructions
-\n1. Checkout branch \`feat/PROJ-1234-...\`
-\n2. Run \`npm test\`
-\n3. Verify that ..."
+cat > /tmp/comment.md << 'CMTBODY'
+## Testing instructions
+1. Checkout branch `feat/PROJ-1234-short-description`
+2. Run `npm test`
+3. Verify that the feature works as expected
+CMTBODY
+
+sops exec-env .agent/secrets.enc.yaml 'jira comment PROJ-1234 --body-file /tmp/comment.md'
+rm -f /tmp/comment.md
 ```
 
 ### 6. List available transitions
 
 ```bash
-jira transitions PROJ-1234
+sops exec-env .agent/secrets.enc.yaml 'jira transitions PROJ-1234'
 ```
 ```
 
@@ -215,22 +251,38 @@ jira transitions PROJ-1234
 ```markdown
 ---
 name : forge-github
-description: Use github as a software forge for the project
+description: Use GitHub as a software forge for the project
 ---
 
 # Skill: GitHub — Software Forge
 
-**CLI:** `gh`
-**Authentication:** via environment variable `GITHUB_TOKEN` sourced from encrypted SOPS file.
+**CLI:** `gh` + `git`
+**Homepage:** https://cli.github.com
+**Authentication:** via `GITHUB_TOKEN` environment variable sourced from encrypted SOPS file (see `.agent/secrets.enc.yaml`).
+**Token scopes required:** `repo`, `read:org`, `project`
+
+> 🔐 **All commands require SOPS.** Run from the project root. Encrypted secrets at `.agent/secrets.enc.yaml`.
+> **SOPS quoting rule:** Always use **single quotes** `'...'` for the command inside `sops exec-env`. If you need dynamic values, write them to a temp file and use `--body-file`.
+> **NEVER use double quotes** around the `sops exec-env` command string — nested variable expansion is error-prone.
+
+---
+
+## 🧭 How to Use This Skill (READ THIS FIRST)
+
+1. **Read this entire file** before executing any operations.
+2. Every command that needs credentials **must** be wrapped with `sops exec-env .agent/secrets.enc.yaml '...'`.
+3. If any command exits with a non-zero code → **STOP**, read the error, and report it. Do NOT skip failures or simulate success.
+4. Do NOT edit files inside `themes/` — they are git submodules. Do NOT use `sudo`.
+5. For `git commit`, **build verification must succeed first** (e.g., `hugo --minify` for Hugo projects). Never commit if the build fails.
+6. **Never** log or display the contents of decrypted secrets.
 
 ---
 
 ## Setup
 
 ```bash
-gh auth login  # interactive one-time setup (stores token in ~/.config/gh/)
-# After SOPS setup, we override with:
-export GITHUB_TOKEN="$(sops exec-env .agent/secrets.yaml 'echo $GITHUB_TOKEN')"
+gh auth login         # interactive one-time setup (stores token in ~/.config/gh/hosts.yml)
+gh auth setup-git     # configure git to use gh as credential helper
 ```
 
 ## Operations
@@ -238,106 +290,108 @@ export GITHUB_TOKEN="$(sops exec-env .agent/secrets.yaml 'echo $GITHUB_TOKEN')"
 ### 1. Clone repo
 
 ```bash
+git clone git@github.com:OWNER/REPO.git
+# Or via gh:
 gh repo clone OWNER/REPO
 ```
 
-### 2. Create branch from ticket
+### 2. Create branch from default base
 
 ```bash
-# Given TICKET_ID=PROJ-1234 and sanitized ticket title as branch name:
-TICKET_ID="PROJ-1234"
-BRANCH="feat/${TICKET_ID}-add-authentication"
+# Given TICKET_ID=42 and sanitized ticket title as branch name:
+TICKET_ID="42"
+# BRANCH naming: {type}/{TICKET_ID}-{slugified-title}
+# Do NOT repeat "ticket" in the name (e.g., "feat/42-add-rate-limiting" is correct;
+# "feat/42-ticket-42" is redundant and confusing).
+BRANCH="feat/${TICKET_ID}-add-rate-limiting"
 BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+git fetch origin
 git stash
-git fetch origin "${BASE_BRANCH}"
-git checkout -b "${BRANCH}" "origin/${BASE_BRANCH}"
+git checkout "${BASE_BRANCH}"
+git pull origin "${BASE_BRANCH}"
+git checkout -b "${BRANCH}"
 ```
 
-### 3. Create branch
-
-```bash
-git checkout -b "feat/PROJ-1234-add-authentication"
-```
-
-### 4. Commit with conventional commit format
+### 3. Commit with conventional commit format
 
 ```bash
 git add -A
-git commit -m "feat(auth): add OAuth2 authentication flow
+git commit -m "feat(scope): description of the change
 
-Implements the OAuth2 authorization code flow with PKCE.
-Adds token refresh and session management.
+Detailed body explaining motivation, approach, and implementation details.
 
-Refs: PROJ-1234"
+Refs: #42"
 ```
 
-### 5. Push branch
+### 4. Push branch
 
 ```bash
-git push -u origin "feat/PROJ-1234-add-authentication"
+git push -u origin "feat/42-add-rate-limiting"
 ```
 
-### 6. Create pull request
+> ⚠️ **Before pushing**, verify the remote URL matches the expected repository:
+> ```bash
+> git remote -v
+> ```
+> If the remote URL differs from the project's canonical URL, update it first:
+> ```bash
+> git remote set-url origin git@github.com:OWNER/REPO.git
+> ```
+> Mismatched remotes cause `No commits between` errors during PR creation.
+
+### 5. Create pull request
+
+> ⚠️ **CRITICAL:** Use `--body-file` with a temp file. NEVER use inline `--body` with variables — nested quoting inside `sops exec-env` will break on special characters, backticks, and newlines.
 
 ```bash
-# First check for PR template
-TEMPLATE=""
-if [ -f ".github/pull_request_template.md" ]; then
-  TEMPLATE="--body-file .github/pull_request_template.md"
-  # Append ticket reference
-  echo -e "\n\n---\nCloses: PROJ-1234" >> .github/pull_request_template.md.tmp
-  TEMPLATE="--body-file .github/pull_request_template.md.tmp"
-fi
-
-gh pr create \
-  --title "feat(auth): add OAuth2 authentication flow" \
-  --body "$(cat <<'EOF'
+# ✅ ONLY recommended approach: Write body to a temp file, then use --body-file
+cat > /tmp/pr_body.md << 'BODY'
 ## Summary
-Implements OAuth2 authorization code flow with PKCE. Adds token refresh, secure storage, and session management middleware.
+Brief summary of the change.
 
 ## Changes
-- Added `/auth/login`, `/auth/callback`, `/auth/refresh` endpoints
-- Implemented PKCE challenge generation and verification
-- Added session middleware with Redis store
-- Added unit and integration tests (coverage > 85%)
+- Change 1
+- Change 2
 
 ## Testing
-1. Run `npm test` — all tests pass
-2. Start dev server: `npm run dev`
-3. Visit `/auth/login` — should redirect to OAuth provider
-4. After auth, verify session cookie is set
-5. Verify token refresh works after expiry
+1. Step 1
+2. Step 2
 
-Closes: PROJ-1234
-EOF
-)" \
-  --base "${BASE_BRANCH:-main}"
+Closes: #42
+BODY
 
-# Clean up template tmp
-rm -f .github/pull_request_template.md.tmp
+sops exec-env .agent/secrets.enc.yaml 'gh pr create \
+  --title "feat(scope): description" \
+  --body-file /tmp/pr_body.md \
+  --base main'
+rm -f /tmp/pr_body.md
 ```
 
-### 7. Check for PR template
+### 6. Check for PR template
 
 ```bash
 ls -la .github/pull_request_template.md 2>/dev/null && echo "Template found" || echo "No template"
-# Also check for GitLab-style:
-ls -la .gitlab/merge_request_templates/ 2>/dev/null
-# Also check docs:
-find . -maxdepth 3 -name "*merge*request*template*" -o -name "*pull*request*template*" 2>/dev/null
+# Also check docs/:
+find . -maxdepth 3 -name "*pull*request*template*" 2>/dev/null
 ```
 
-### 8. List open PRs
+### 7. List open PRs
 
 ```bash
-gh pr list --state open
+sops exec-env .agent/secrets.enc.yaml 'gh pr list --state open'
+```
+
+**Example output:**
+```
+#42  feat(middleware): add rate-limiting  feat/42-rate-limiting  OPEN
+#41  fix(auth): handle token expiry        fix/41-token-expiry     OPEN
 ```
 ```
 ---
 
 ## PHASE 4 — SOPS Setup
 
-### 5.1 — Check if SOPS + age are installed
+### 4.1 — Check if SOPS + age are installed
 
 ```bash
 sops --version && age --version
@@ -362,7 +416,7 @@ If **SOPS is not installed**, output:
 
 If **Age is not installed**, output the same instructions (it's bundled with most SOPS installs).
 
-### 5.2 — Generate an Age key pair
+### 4.2 — Generate an Age key pair
 
 ```bash
 # Create the age key directory
@@ -380,7 +434,7 @@ echo "⚠️  Backup ~/.config/sops/age/keys.txt securely (e.g., in a password m
 echo "    Without this file, you CANNOT decrypt your secrets."
 ```
 
-### 5.3 — Create SOPS config file
+### 4.3 — Create SOPS config file
 
 Create `.sops.yaml` in the project root:
 
@@ -397,7 +451,7 @@ creation_rules:
 Replace `AGE_PUBLIC_KEY_PLACEHOLDER` with the actual public key from step 5.2.
 ---
 
-## PHASE 4 — Create Credentials Template
+## PHASE 5 — Create Credentials Template
 
 Create `.agent/secrets.yaml` with placeholders. Detect which services were chosen and include only the relevant sections:
 
@@ -433,13 +487,13 @@ After writing this file, tell the user:
 
 > ⚠️ **Action required:** Edit `.agent/secrets.yaml` and replace every placeholder with your real credentials. Use API tokens, never passwords. For GitHub: create a [Personal Access Token](https://github.com/settings/tokens) with `repo`, `workflow`, `project` scopes. For Jira: create an [API Token](https://id.atlassian.com/manage/api-tokens). Then, tell user to proceed with phase 5.4.
 
-### 5.4 — Encrypt the secrets file
+### 5.1 — Encrypt the secrets file
 
 ```bash
 sops --encrypt .agent/secrets.yaml > .agent/secrets.enc.yaml
 ```
 
-### 5.5 — Add to .gitignore (Default: SECRETS ARE GITIGNORED)
+### 5.2 — Add to .gitignore (Default: SECRETS ARE GITIGNORED)
 
 **By default, all plaintext secrets files are gitignored.** This is the secure default — your credentials will never be committed accidentally. The encrypted file (`.agent/secrets.enc.yaml`) is safe to commit.
 
@@ -475,6 +529,17 @@ Create `.agent/skills/secrets-sops.md`:
 
 ---
 
+## 🧭 How to Use This Skill (READ THIS FIRST)
+
+1. **Read this entire file** before executing any operations.
+2. Every command that needs credentials **must** use `sops exec-env` — never extract secrets to a plaintext file.
+3. The only allowed pattern is: `sops exec-env .agent/secrets.enc.yaml 'your-command-here'` with **single quotes**.
+4. **Never use double quotes** around the `sops exec-env` command. If you need dynamic values, write them to a temp file first.
+5. **Never** display, log, or echo the contents of decrypted secrets.
+6. If `sops exec-env` fails, report the error — do NOT try alternative decryption methods.
+
+---
+
 ## Architecture
 
 ```
@@ -487,7 +552,7 @@ Create `.agent/skills/secrets-sops.md`:
 ```
 
 **Principle:** Every CLI command that requires a secret passes it via **environment variable**, sourced at runtime from the encrypted file using `sops exec-env`. No secret is ever written to disk in plaintext after the initial encryption.
-**WARNING** Appart from `sops exec-env` it is prohibited for the AI agent to directly decrypt and read the secrets ! They should **NEVER** be send to an AI server.
+**WARNING**: Apart from `sops exec-env`, it is prohibited for the AI agent to directly decrypt and read the secrets! They should **NEVER** be sent to an AI server.
 
 ---
 
@@ -534,7 +599,7 @@ Instead write:
 sops exec-env .agent/secrets.enc.yaml 'gh pr create --title "..." --body "..."'
 ```
 
-Or, for multi-command sequences:
+Or, for multi-command sequences (use `--body-file` if the body has multiple lines):
 
 ```bash
 sops exec-env .agent/secrets.enc.yaml '
@@ -542,6 +607,14 @@ sops exec-env .agent/secrets.enc.yaml '
   gh pr merge --auto
 '
 ```
+
+> 💡 For multi-line bodies, write to a temp file instead of using `$BODY`:
+> ```bash
+> sops exec-env .agent/secrets.enc.yaml '
+>   gh pr create --title "feat(scope): description" --body-file /tmp/pr_body.md
+>   gh pr merge --auto
+> '
+> ```
 ````
 
 ---
@@ -566,9 +639,44 @@ Add a note at the top of each skill file:
 
 ```markdown
 > 🔐 **All commands require SOPS.** Run from the project root. Encrypted secrets at `.agent/secrets.enc.yaml`.
+> **SOPS quoting rule:** Always use **single quotes** `'...'` for the command inside `sops exec-env`. **NEVER use double quotes** — nested variable expansion inside `sops exec-env` breaks on special characters. Use `--body-file` with a temp file if you need multi-line content.
 ```
 
 Also update the forge skill's "Create merge/pull request" operation to dynamically detect templates and handle the body properly.
+
+### Critical: Fix PR/MR body construction
+
+**This is the #1 source of bugs for AI agents.** The interaction between SOPS quoting and multi-line PR bodies is extremely fragile. A small model will almost certainly get the quoting wrong.
+
+**Rule: ONLY use the temp file pattern. NEVER use inline variables inside `sops exec-env`.**
+
+✅ **ONLY correct pattern — Body file (zero quoting issues):**
+
+```bash
+cat > /tmp/pr_body.md << 'BODY'
+## Summary
+Brief summary of the change.
+
+## Changes
+- Change 1
+- Change 2
+
+## Testing
+1. Step 1
+2. Step 2
+
+Closes: #42
+BODY
+
+sops exec-env .agent/secrets.enc.yaml 'gh pr create --title "feat(scope): description" --body-file /tmp/pr_body.md --base main'
+rm -f /tmp/pr_body.md
+```
+
+> 🚫 **NEVER do this** — nested quoting breaks on special characters, backticks, or newlines:
+> ```bash
+> # ❌ WRONG — will break unpredictably
+> sops exec-env .agent/secrets.enc.yaml "gh pr create --title '...' --body '"${BODY}"' --base main"
+> ```
 
 ---
 
@@ -598,7 +706,7 @@ Capture the ticket ID (e.g., `PROJ-5678`).
 
 ```bash
 sops exec-env .agent/secrets.enc.yaml 'jira trans "In Progress" PROJ-5678'
-sops exec-env .agent/secrets.enc.yaml 'jira assign PROJ-5678 '"$TICKET_USERNAME"
+sops exec-env .agent/secrets.enc.yaml "jira assign PROJ-5678 ${TICKET_USERNAME}"
 ```
 
 ### Step 8.3 — Create feature branch
@@ -607,9 +715,11 @@ sops exec-env .agent/secrets.enc.yaml 'jira assign PROJ-5678 '"$TICKET_USERNAME"
 TICKET_ID="PROJ-5678"
 BRANCH_NAME="feat/${TICKET_ID}-rate-limiting-middleware"
 BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+git fetch origin
 git stash
-git fetch origin "${BASE_BRANCH}"
-git checkout -b "${BRANCH_NAME}" "origin/${BASE_BRANCH}"
+git checkout "${BASE_BRANCH}"
+git pull origin "${BASE_BRANCH}"
+git checkout -b "${BRANCH_NAME}"
 ```
 
 ### Step 8.4 — Implement the feature
@@ -644,14 +754,8 @@ git push -u origin "${BRANCH_NAME}"
 ### Step 8.7 — Create merge/pull request
 
 ```bash
-# Detect template
-PR_TEMPLATE=""
-if [ -f ".github/pull_request_template.md" ]; then
-  cp .github/pull_request_template.md /tmp/pr_body.md
-  echo -e "\n\n---\nCloses: PROJ-5678" >> /tmp/pr_body.md
-  BODY_ARG="--body-file /tmp/pr_body.md"
-else
-  BODY_ARG="--body $(cat <<'PRBODY'
+# Write the PR body to a temp file (avoids ALL quoting issues)
+cat > /tmp/pr_body.md << 'BODY'
 ## Summary
 Added configurable rate-limiting middleware using token bucket algorithm. Supports per-IP and per-user limits with configurable window size, max tokens, and refill rate. Returns 429 with Retry-After header.
 
@@ -670,14 +774,12 @@ Added configurable rate-limiting middleware using token bucket algorithm. Suppor
 6. Wait for window reset, verify requests succeed again
 
 Closes: PROJ-5678
-PRBODY
-)"
-fi
+BODY
 
-sops exec-env .agent/secrets.enc.yaml "gh pr create \
-  --title 'feat(middleware): add configurable rate-limiting middleware' \
-  ${BODY_ARG} \
-  --base '${BASE_BRANCH:-main}'"
+sops exec-env .agent/secrets.enc.yaml 'gh pr create \
+  --title "feat(middleware): add configurable rate-limiting middleware" \
+  --body-file /tmp/pr_body.md \
+  --base main'
 
 rm -f /tmp/pr_body.md
 ```
@@ -697,19 +799,25 @@ Then transition and comment:
 sops exec-env .agent/secrets.enc.yaml 'jira trans "In Review" PROJ-5678'
 
 # Add testing instructions
-sops exec-env .agent/secrets.enc.yaml 'jira comment PROJ-5678 -m "## How to test
-1. Pull branch \`feat/PROJ-5678-rate-limiting-middleware\`
-2. Run \`npm test\` — all tests pass
-3. Run \`npm run dev\` to start the server
-4. Send rapid requests: \`for i in {1..20}; do curl -i http://localhost:3000/api/test; done\`
+# Write comment body to a temp file to avoid quoting issues
+cat > /tmp/comment.md << 'CMTBODY'
+## How to test
+1. Pull branch `feat/PROJ-5678-rate-limiting-middleware`
+2. Run `npm test` — all tests pass
+3. Run `npm run dev` to start the server
+4. Send rapid requests: `for i in {1..20}; do curl -i http://localhost:3000/api/test; done`
 5. Verify:
    - First N requests return 200 (within limit)
    - Subsequent requests return 429 Too Many Requests
-   - \`Retry-After\` header is present
+   - `Retry-After` header is present
    - After window reset, requests succeed again
-6. Check Redis keys: \`redis-cli keys 'ratelimit:*'\`
+6. Check Redis keys: `redis-cli keys 'ratelimit:*'`
 
-PR: <link-to-pr>"'
+PR: <link-to-pr>
+CMTBODY
+
+sops exec-env .agent/secrets.enc.yaml 'jira comment PROJ-5678 --body-file /tmp/comment.md'
+rm -f /tmp/comment.md
 ```
 
 ### Step 8.9 — Cleanup
@@ -722,7 +830,7 @@ git checkout "${BASE_BRANCH}"
 
 ## PHASE 9 — Generate the Reusable "Complete Use Case" Prompt
 
-After the demo succeeds, write to file (`implement-ticket.md`) the following reusable prompt. Tell the user:
+After the demo succeeds, write to file (`.agent/prompts/implement-ticket.md`) the following reusable prompt. Tell the user:
 
 > ✅ **Toolchain verified!** I wrote a reusable prompt you can use for every future ticket. use it in your favorite IA agent by running "/implement-ticket" followed by the ticket ID. 
 
@@ -749,6 +857,7 @@ If you encounter any issue with your skills, update them with what your learned 
 1. Source encrypted credentials: verify `.agent/secrets.enc.yaml` exists and is decryptable.
 2. Verify you are in the project root.
 3. Confirm git status is clean.
+4. **Detect the project build command** (look for `package.json`, `Makefile`, `Cargo.toml`, `build.gradle`, `hugo`, etc.) — you will need it in Step 4.
 
 ### Step 1 — Fetch Ticket Details
 Use the ticket manager skill (`.agent/skills/ticket-*.md`) to:
@@ -779,9 +888,11 @@ TICKET_ID="{TICKET_ID}"
 TICKET_TYPE="feat"  # or "fix", "chore", "docs", "refactor" — infer from ticket
 BRANCH_NAME="${TICKET_TYPE}/${TICKET_ID}-short-description"
 BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+git fetch origin
 git stash
-git fetch origin "${BASE_BRANCH}"
-git checkout -b "${BRANCH_NAME}" "origin/${BASE_BRANCH}"
+git checkout "${BASE_BRANCH}"
+git pull origin "${BASE_BRANCH}"
+git checkout -b "${BRANCH_NAME}"
 ```
 
 ### Step 4 — Implement the Feature
@@ -793,6 +904,26 @@ git checkout -b "${BRANCH_NAME}" "origin/${BASE_BRANCH}"
   - Run the type checker if applicable (TypeScript, mypy, etc.).
   - Ensure all existing tests still pass.
   - Follow existing code patterns and architecture.
+- **Verify the build passes** before committing any changes:
+
+```bash
+# Detect and run the project build command
+# Examples: hugo --minify, npm run build, make build, cargo build, etc.
+# Look in package.json, Makefile, Cargo.toml, or other build configs
+BUILD_CMD=$(jq -r '.scripts.build // empty' package.json 2>/dev/null || true)
+if [ -n "$BUILD_CMD" ]; then
+  echo "Running build: $BUILD_CMD"
+  npm run build 2>&1
+elif [ -f "Makefile" ]; then
+  make build 2>&1 || make all 2>&1 || true
+elif [ -f "Cargo.toml" ]; then
+  cargo build 2>&1
+else
+  echo "No build command detected, skipping build verification"
+fi
+```
+
+If the build fails, fix the error before proceeding. **Never commit code that breaks the build.**
 
 ### Step 5 — Commit with Conventional Commits
 - Stage all changes.
@@ -829,10 +960,39 @@ git push -u origin "${BRANCH_NAME}"
   - **Testing** (exact commands to verify the feature)
 - Reference the ticket ID.
 - Use the forge skill (`.agent/skills/forge-*.md`) with SOPS wrapping.
+- **IMPORTANT PR body construction:** Do NOT use inline variables inside `sops exec-env`. ONLY use a temp file with `--body-file`. This is the only pattern that handles newlines, backticks, single quotes, and double quotes safely:
 
 ```bash
-sops exec-env .agent/secrets.enc.yaml '{forge-cli pr create ...}'
+# ✅ ONLY correct pattern: Write body to a temp file
+cat > /tmp/pr_body.md << 'BODY'
+## Summary
+Brief summary of the change.
+
+## Changes
+- Change 1
+- Change 2
+
+## Testing
+1. Step 1
+2. Step 2
+3. Verify ...
+
+Closes: #{TICKET_ID}
+BODY
+
+sops exec-env .agent/secrets.enc.yaml '{forge-cli pr create} \
+  --title "feat(scope): description" \
+  --body-file /tmp/pr_body.md \
+  --base main'
+
+rm -f /tmp/pr_body.md
 ```
+
+> 🚫 **NEVER do this** — inline body expansion inside `sops exec-env` breaks on special characters:
+> ```bash
+> # ❌ WRONG — will fail unpredictably
+> sops exec-env .agent/secrets.enc.yaml "gh pr create --title '...' --body '"${BODY}"' --base main"
+> ```
 
 ### Step 8 — Update Ticket to Review/Test Status
 - List available transitions for the ticket.
@@ -845,8 +1005,15 @@ sops exec-env .agent/secrets.enc.yaml '{forge-cli pr create ...}'
 ```bash
 sops exec-env .agent/secrets.enc.yaml '{ticket-cli transitions {TICKET_ID}}'
 sops exec-env .agent/secrets.enc.yaml '{ticket-cli trans "In Review" {TICKET_ID}}'
-sops exec-env .agent/secrets.enc.yaml '{ticket-cli comment {TICKET_ID} -m "## Testing instructions
-{instructions}"}'
+
+# Use --body-file for multi-line comments to avoid quoting issues
+cat > /tmp/comment.md << 'CMTBODY'
+## Testing instructions
+{instructions}
+CMTBODY
+
+sops exec-env .agent/secrets.enc.yaml '{ticket-cli comment} {TICKET_ID} --body-file /tmp/comment.md'
+rm -f /tmp/comment.md
 ```
 
 ### Step 9 — Cleanup
@@ -870,6 +1037,7 @@ Output a summary of everything that was done:
 **Constraints:**
 - Never expose secrets in output or logs.
 - Always use `sops exec-env` for any command requiring credentials.
+- **Build verification:** Always run the project build command before committing. Never commit code that breaks the build.
 - If any step fails, stop and report the error with context before proceeding.
 - Do not modify files outside the feature scope.
 - Respect existing `.gitignore`, linter configs, and project conventions.
@@ -879,7 +1047,7 @@ Output a summary of everything that was done:
 
 ## PHASE 10 — Generate the "Review MR/PR" Prompt
 
-After the demo succeeds, write to file (`review-mr-pr.md`) a reusable prompt that uses the ticket and forge skills to perform a thorough code review of an open merge/pull request and post the result both on the PR itself and as a comment in the ticket tracker.
+After the demo succeeds, write to file (`.agent/prompts/review-mr-pr.md`) a reusable prompt that uses the ticket and forge skills to perform a thorough code review of an open merge/pull request and post the result both on the PR itself and as a comment in the ticket tracker.
 
 ````markdown
 ---
@@ -931,6 +1099,26 @@ git fetch origin "${BRANCH_NAME}"
 git checkout -b "review-${BRANCH_NAME}" "origin/${BRANCH_NAME}"
 ```
 
+### Step 3b — Verify the Build Succeeds
+Before writing the review, verify that the PR branch builds successfully.
+
+```bash
+# Detect and run the project build command
+BUILD_CMD=$(jq -r '.scripts.build // empty' package.json 2>/dev/null || true)
+if [ -n "$BUILD_CMD" ]; then
+  echo "Running build: $BUILD_CMD"
+  npm run build 2>&1
+elif [ -f "Makefile" ]; then
+  make build 2>&1 || make all 2>&1 || true
+elif [ -f "Cargo.toml" ]; then
+  cargo build 2>&1
+else
+  echo "No build command detected, skipping build verification"
+fi
+```
+
+If `hugo --minify` (or the equivalent build command) fails, note the build error as a **blocking issue** in your review. Do not skip or ignore build failures.
+
 ### Step 4 — Perform Code Review
 Review every changed file with a critical eye. Check for:
 
@@ -976,14 +1164,25 @@ For an overall review decision:
 
 ```bash
 # Example: GitHub — submit a review with inline comments
-sops exec-env .agent/secrets.enc.yaml 'gh pr review PR_NUMBER \
-  --body "REVIEW_BODY" \
-  --COMMENT|--APPROVE|--REQUEST_CHANGES'
+# Build the review body in a temp file
+cat > /tmp/review_body.md << 'REVIEW'
+REVIEW_CONTENT
+REVIEW
 
-# Example: GitLab — submit a review
+sops exec-env .agent/secrets.enc.yaml 'gh pr review PR_NUMBER \
+  --body-file /tmp/review_body.md \
+  --COMMENT|--APPROVE|--REQUEST_CHANGES'
+rm -f /tmp/review_body.md
+
+# Example: GitLab — submit a review (use body file, same as GitHub)
+cat > /tmp/review_body.md << 'REVIEW'
+REVIEW_CONTENT
+REVIEW
+
 sops exec-env .agent/secrets.enc.yaml 'glab mr review MR_NUMBER \
-  --body "REVIEW_BODY" \
+  --body-file /tmp/review_body.md \
   --approve|--unapprove'
+rm -f /tmp/review_body.md
 ```
 
 ### Step 7 — Post Review Summary on the Ticket
@@ -994,7 +1193,9 @@ Use the ticket manager skill to add a comment to the associated ticket with:
 - Next steps (e.g., "Please address the 2 blocking issues above, then re-request review").
 
 ```bash
-sops exec-env .agent/secrets.enc.yaml '{ticket-cli comment TICKET_ID -m "## Code Review Summary
+# Write the ticket summary to a temp file
+cat > /tmp/ticket_comment.md << 'TICKET'
+## Code Review Summary
 
 **MR/PR:** LINK_TO_MR
 **Verdict:** APPROVED|CHANGES_REQUESTED|COMMENT_ONLY
@@ -1011,7 +1212,11 @@ sops exec-env .agent/secrets.enc.yaml '{ticket-cli comment TICKET_ID -m "## Code
 - Good error handling pattern
 - ...
 
-**Next steps:** Please address the blocking issues and re-request review."}'
+**Next steps:** Please address the blocking issues and re-request review.
+TICKET
+
+sops exec-env .agent/secrets.enc.yaml '{ticket-cli comment} TICKET_ID --body-file /tmp/ticket_comment.md'
+rm -f /tmp/ticket_comment.md
 ```
 
 ### Step 8 — Update Ticket Status (Optional)
@@ -1045,13 +1250,14 @@ Output a summary of the review:
 - Only review the files changed in the MR/PR.
 - Be constructive and respectful in all review comments.
 - If no ticket is referenced, skip steps 2 and 7 (only post to the MR/PR).
+- **Build verification:** Checkout the branch, run the build, and if it fails, log it as a blocking issue.
 ````
 
 ---
 
 ## PHASE 11 — Generate the "CI Auto-Fix" Prompt
 
-After the demo succeeds, write to file (`ci-autofix.md`) a reusable prompt that listens to CI feedback (e.g., SonarQube quality gate failure, lint errors, test failures, security scan alerts) and automatically fixes the issues on a new branch, pushes it, and updates the ticket/PR.
+After the demo succeeds, write to file (`.agent/prompts/ci-autofix.md`) a reusable prompt that listens to CI feedback (e.g., SonarQube quality gate failure, lint errors, test failures, security scan alerts) and automatically fixes the issues on a new branch, pushes it, and updates the ticket/PR.
 
 ````markdown
 ---
@@ -1157,6 +1363,22 @@ npx jest --testPathPattern="path/to/test" -t "should handle edge case"
 npx tsc --noEmit
 ```
 
+- **Verify the build passes** before moving on to the next fix:
+
+```bash
+# Detect and run build command
+BUILD_CMD=$(jq -r '.scripts.build // empty' package.json 2>/dev/null || true)
+if [ -n "$BUILD_CMD" ]; then
+  npm run build 2>&1
+elif [ -f "Makefile" ]; then
+  make build 2>&1 || make all 2>&1 || true
+elif [ -f "Cargo.toml" ]; then
+  cargo build 2>&1
+fi
+```
+
+If the build fails, fix the error before proceeding. **Never commit code that breaks the build.**
+
 ### Step 6 — Commit the Fixes
 Use a conventional commit message that references both the ticket and the CI tool:
 
@@ -1184,9 +1406,8 @@ git push -u origin "${BRANCH_NAME}"
 If the original work is already in an MR/PR, push to the same branch instead of creating a new one. If starting from a ticket, create a new MR/PR for the fixes.
 
 ```bash
-sops exec-env .agent/secrets.enc.yaml 'gh pr create \
-  --title "fix(scope): address CI feedback — TICKET_ID" \
-  --body "$(cat <<EOF
+# ✅ ONLY correct pattern: Write body to a temp file
+cat > /tmp/fix_pr_body.md << 'BODY'
 ## Summary
 This PR addresses issues reported by the CI pipeline (TOOL_NAME) for TICKET_ID.
 
@@ -1198,14 +1419,19 @@ This PR addresses issues reported by the CI pipeline (TOOL_NAME) for TICKET_ID.
 | LINT-789 | Minor | utils.ts:10 | Unused variable |
 
 ## Testing
-1. Run CI pipeline locally: \`npm run ci\`
+1. Run CI pipeline locally: `npm run ci`
 2. Verify all previously failing checks now pass
-3. Confirm no regressions: \`npm test\`
+3. Confirm no regressions: `npm test`
 
 Refs: TICKET_ID
-EOF
-)" \
-  --base "${BASE_BRANCH:-main}"'
+BODY
+
+sops exec-env .agent/secrets.enc.yaml 'gh pr create \
+  --title "fix(scope): address CI feedback — TICKET_ID" \
+  --body-file /tmp/fix_pr_body.md \
+  --base main'
+
+rm -f /tmp/fix_pr_body.md
 ```
 
 ### Step 9 — Update the Ticket with Fix Summary
@@ -1216,16 +1442,18 @@ Add a comment to the ticket explaining:
 - A link to the fix branch or MR/PR.
 
 ```bash
-sops exec-env .agent/secrets.enc.yaml '{ticket-cli comment TICKET_ID -m "## CI Auto-Fix Report — TOOL_NAME
+# Write the ticket comment to a temp file
+cat > /tmp/ci_report.md << 'CIREPORT'
+## CI Auto-Fix Report -- TOOL_NAME
 
-**Branch:** \`FIX_BRANCH\`
+**Branch:** `FIX_BRANCH`
 **MR/PR:** LINK_TO_MR
 
 | Status | Count |
 |--------|-------|
-| P0 — Fixed (blockers) | N |
-| P1 — Fixed (clear issues) | M |
-| P2 — Noted (minor/suggestions) | K |
+| P0 -- Fixed (blockers) | N |
+| P1 -- Fixed (clear issues) | M |
+| P2 -- Noted (minor/suggestions) | K |
 | Skipped (false positives) | L |
 | **Total issues** | TOTAL |
 
@@ -1240,9 +1468,13 @@ sops exec-env .agent/secrets.enc.yaml '{ticket-cli comment TICKET_ID -m "## CI A
 - CODE-999 (legacy.ts:200): Cognitive complexity too high. Noted for future refactor (out of scope).
 
 ### Skipped
-- FP-111 (test.ts:5): False positive. Test helper intentionally uses \`any\`.
+- FP-111 (test.ts:5): False positive. Test helper intentionally uses `any`.
 
-**Next steps:** Please review the fix branch and merge if approved. The CI pipeline should be re-run to confirm resolution."}'
+**Next steps:** Please review the fix branch and merge if approved. The CI pipeline should be re-run to confirm resolution.
+CIREPORT
+
+sops exec-env .agent/secrets.enc.yaml '{ticket-cli comment} TICKET_ID --body-file /tmp/ci_report.md'
+rm -f /tmp/ci_report.md
 ```
 
 ### Step 10 — Cleanup
@@ -1269,9 +1501,143 @@ Output a summary of everything done:
 - Minimal fixes only — no opportunistic refactoring.
 - If unsure about any fix (e.g., ambiguous business logic), add it as a P2 note instead of changing code.
 - If the CI report is empty or unreadable, stop and ask for a valid report.
+- **Build verification:** Run the project build after each fix. Never commit code that breaks the build.
 ````
 
 ---
+
+## PHASE 12 — Generate the "Fix PR" Prompt
+
+After the demo succeeds, write to file (`.agent/prompts/fix-pr.md`) a reusable prompt that handles fix requests on pull requests. This prompt is triggered when a reviewer or user asks for a specific fix on a PR.
+
+````markdown
+---
+name: fix pull request prompt
+description: workflow describing how to fix an issue on a pull request, given its ID and an optional fix description
+argument-hint: "<pr-id> [fix-description]"
+---
+
+## 🔧 Fix PR Workflow — PR: $1 | Fix: $2
+
+You are an expert software engineer AI agent. Using the skills and tooling set up in `.agent/`, fix the issue described in the trigger comment on the given pull request. After fixing, push the changes and comment back on the PR.
+
+Use your @forge, @secrets and @ticket skills to process the user request.
+
+### Pre-flight Checklist
+1. Source encrypted credentials: verify `.agent/secrets.enc.yaml` exists and is decryptable.
+2. Verify you are in the project root.
+3. Confirm git status is clean.
+
+### Step 1 — Understand the Fix Request
+Read the environment variables or arguments to understand what needs to be fixed.
+
+### Step 2 — Fetch PR Details
+Use the forge skill to fetch the full PR details and diff:
+
+```bash
+sops exec-env .agent/secrets.enc.yaml '{forge-cli pr view} PR_NUMBER --json title,body,headRefName,baseRefName,author,files,labels,state'
+sops exec-env .agent/secrets.enc.yaml '{forge-cli pr diff} PR_NUMBER'
+```
+
+### Step 3 — Checkout the PR Branch Locally
+Fetch and checkout the PR source branch:
+
+```bash
+BRANCH_NAME=$(sops exec-env .agent/secrets.enc.yaml '{forge-cli pr view} PR_NUMBER --json headRefName --jq .headRefName')
+git stash
+git fetch origin "${BRANCH_NAME}"
+git checkout -b "fix-${BRANCH_NAME}" "origin/${BRANCH_NAME}"
+```
+
+### Step 4 — Implement the Fix
+- Read the relevant files to understand the context.
+- Apply the **minimal fix** needed — do not refactor or change unrelated code.
+- Write or update tests to cover the fix.
+- **Verify the build passes** before committing:
+
+```bash
+# Detect and run build command
+BUILD_CMD=$(jq -r '.scripts.build // empty' package.json 2>/dev/null || true)
+if [ -n "$BUILD_CMD" ]; then
+  npm run build 2>&1
+elif [ -f "Makefile" ]; then
+  make build 2>&1 || make all 2>&1 || true
+elif [ -f "Cargo.toml" ]; then
+  cargo build 2>&1
+fi
+```
+
+If the build fails, fix the error before proceeding. **Never commit code that breaks the build.**
+
+### Step 5 — Commit and Push
+
+```bash
+git add -A
+git commit -m "fix(pr): address fix request on PR #PR_NUMBER
+
+Request: $2
+
+Refs: #PR_NUMBER"
+
+# Push using the sops-decrypted token (not plain git push)
+cat > /tmp/push.sh << 'PUSHSCRIPT'
+#!/bin/bash
+set -e
+git push "https://x-access-token:${FORGE_TOKEN}@${FORGE_HOST}/${REPO}.git" "HEAD:${BRANCH_NAME}"
+PUSHSCRIPT
+chmod +x /tmp/push.sh
+sops exec-env .agent/secrets.enc.yaml /tmp/push.sh
+rm -f /tmp/push.sh
+```
+
+### Step 6 — Comment Back on the PR
+
+```bash
+# Write comment body to temp file
+cat > /tmp/fix_comment.md << 'FIXCOMMENT'
+## ✅ Fix Applied
+
+**Requested by:** USER
+**What was fixed:** FIX_DESC
+
+### Changes
+- Summary of what was changed and why.
+
+**Next steps:** The fix has been pushed to the branch. The CI pipeline should re-trigger automatically.
+FIXCOMMENT
+
+sops exec-env .agent/secrets.enc.yaml '{forge-cli pr comment} PR_NUMBER --body-file /tmp/fix_comment.md'
+rm -f /tmp/fix_comment.md
+```
+
+### Step 7 — Cleanup
+Return to the base branch and delete the fix branch.
+
+```bash
+BASE_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@')
+git checkout "${BASE_BRANCH}"
+git branch -D "fix-${BRANCH_NAME}" 2>/dev/null || true
+```
+
+### Step 8 — Summary
+Output a summary of everything done:
+- PR ID and link
+- What was fixed
+- Key files modified
+- Link to the fix comment
+
+---
+
+**Constraints:**
+- Never expose secrets in output or logs.
+- Always use `sops exec-env` for any command requiring credentials.
+- Only fix what was requested — do not widen the scope.
+- If the fix request is unclear, ask for clarification on the PR instead of making assumptions.
+- **Build verification:** Run the project build before committing. Never commit code that breaks the build.
+````
+
+---
+
 
 ## Final Instructions to the Agent
 
@@ -1287,9 +1653,10 @@ After completing all phases and outputting all reusable prompts, remind the user
 > - `.sops.yaml` — SOPS configuration
 >
 > **Reusable prompts generated:**
-> - `implement-ticket.md` — Full ticket implementation workflow
-> - `review-mr-pr.md` — MR/PR code review with ticket comment
-> - `ci-autofix.md` — Automatic CI issue resolution
+> - `.agent/prompts/implement-ticket.md` — Full ticket implementation workflow
+> - `.agent/prompts/review-mr-pr.md` — MR/PR code review with ticket comment
+> - `.agent/prompts/ci-autofix.md` — Automatic CI issue resolution
+> - `.agent/prompts/fix-pr.md` — Fix a specific issue on a pull request
 >
 > **What to do next:**
 > 1. **Commit the `.agent/` directory** to your repository (colleagues will add their own encrypted secrets).
