@@ -96,3 +96,28 @@ tmux send-keys -t agent-session "${ma_commande}" Enter
 ```
 ----
 
+=== Prompt
+
+--
+C'est un *template* réutilisable pour guide le LLM dans la réalisation d'une tâche spécifique, en s'appuyant éventuellement sur des skills. 
+--
+
+=== Exemple
+[source, markdown]
+----
+---
+name: lancer-une-commande
+description: Comment lancer une commande dans une session tmux 
+argument-hint: "<ma-commande>"
+---
+
+# Instructions
+
+* Lis ta skill tmux-session
+* Dans une nouvelle session tmux, lance la commande <ma-commande>
+----
+
+[.notes]
+--
+Il existe d'autre headers, mais tous ne sont pas supportés par les différents agents de code.
+--

@@ -9,7 +9,7 @@ Présenter ici les spécificités de workflow de travail, en insistant sur son c
 === Quelques étapes (IA)
 
 [.step]
-* 📋 *Board Jira* (Sélectionner et mettre à jour le ticket)
+* 📋 *Board Kanban* (Sélectionner et mettre à jour le ticket)
 * 🌿 *Git* (Créer une branche & worktree)
 * 💻 *Développement*
 * ✅ *Tests et Qualité* (Sonar)
@@ -24,3 +24,44 @@ Présenter ici les spécificités de workflow de travail, en insistant sur son c
 * ✨ *Merge* 
 
 --
+
+=== Trois skills - un Prompt
+
+=== Forge
+
+[source, markdown]
+----
+---
+name: forge-github
+description: Use GitHub as a software forge for the project
+---
+----
+
+=== Project management
+
+[source, markdown]
+----
+---
+name: ticket-github-projects
+description: Use GitHub Issues + Projects as a ticket manager for the project
+---
+----
+
+=== SOPS
+[source, markdown]
+----
+---
+name: secrets-sops
+description: Encrypted secrets management using SOPS + age
+---
+----
+
+=== Prompt d'intégration
+[source, markdown]
+----
+---
+name: implement ticket prompt
+description: workflow describing how to implement a ticket, given its number
+argument-hint: "<ticket-id>"
+---
+----
