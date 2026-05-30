@@ -8,7 +8,7 @@
 cd slides
 
 # Generates qrcode that link to talk home
-./qrcode.java -o slides/images/qr_home.svg https://jtama.github.io/oop-to-dop/home.html
+./qrcode.java -o slides/images/qr_home.svg https://ibethus.github.io/deleguez-vos-taches-a-l-ia/home.html
 ----
 
 === Run locally
