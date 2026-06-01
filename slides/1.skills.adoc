@@ -99,7 +99,7 @@ tmux send-keys -t agent-session "${ma_commande}" Enter
 === Prompt
 
 --
-C'est un *template* réutilisable pour guide le LLM dans la réalisation d'une tâche spécifique, en s'appuyant éventuellement sur des skills. 
+C'est un *template* réutilisable permettant de guider le LLM dans la réalisation d'une tâche spécifique, en s'appuyant éventuellement sur des skills. 
 --
 
 === Exemple
