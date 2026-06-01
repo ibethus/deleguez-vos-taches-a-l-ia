@@ -8,4 +8,4 @@
 === Merci !
 
 image::home.png[background, size=cover]
-image:qr_home.svg[alt="https://jtama.github.io/oop-to-dop/home.html", width=400]
+image:qr_home.svg[alt="https://ibethus.github.io/deleguez-vos-taches-a-l-ia/home.html", width=400]
