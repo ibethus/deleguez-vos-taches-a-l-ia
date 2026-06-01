@@ -1,3 +1,9 @@
+=== Choisir son agent de code
+#todo rapide comparatif
+
+=== Cadeau !
+#todo présenter le prompt d'onboarding
+
 [.transparency.no-transition]
 === Merci !
 
