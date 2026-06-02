@@ -1,4 +1,4 @@
-= Déléguez vos tâches à faible valuer ajoutée à l'IA
+= Déléguez vos tâches à faible valeur ajoutée à l'IA
 
 == Slides
 === Generate
