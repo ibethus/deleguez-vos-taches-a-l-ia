@@ -25,7 +25,7 @@ image::pi-coding-agent.png[width=150]
 === pi 
 
 [.step]
-* Commandes personnalisées - Enregistrer des commandes comme /macommande via `pi.registerCommand()`
+* Commandes personnalisées - Enregistrer des commandes comme `/macommande` via `pi.registerCommand()`
 * Persistance de session - Stocker un état qui persiste après redémarrage via `pi.appendEntry()`
 * Rendu personnalisé - Contrôler l'apparence des appels d'outils/résultats et des messages dans le TUI
 
