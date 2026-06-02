@@ -1,8 +1,37 @@
-=== Choisir son agent de code
-#todo rapide comparatif
+[.columns]
+== Choisir son agent de code
+[.column]
+--
+image::codex-color.png[width=150]
+image::anthropic.svg[width=150]
+--
+
+[.column]
+--
+image::github-copilot.png[width=150]
+image::pi-coding-agent.png[width=150]
+--
+
+[%auto-animate]
+=== pi 
+
+[.step]
+* Outils personnalisés - Enregistrer des outils que l'IA peut appeler via `pi.registerTool()`
+* Interception d'événements - Bloquer ou modifier les appels d'outils, injecter du contexte, personnaliser la compaction
+* Interaction utilisateur - via `ctx.ui` (sélectionner, confirmer, saisir, notifier)
+* Composants d'interface personnalisés - Composants TUI complets avec entrée au clavier via `ctx.ui.custom()`
+
+[%auto-animate]
+=== pi 
+
+[.step]
+* Commandes personnalisées - Enregistrer des commandes comme /macommande via `pi.registerCommand()`
+* Persistance de session - Stocker un état qui persiste après redémarrage via `pi.appendEntry()`
+* Rendu personnalisé - Contrôler l'apparence des appels d'outils/résultats et des messages dans le TUI
+
 
 === Cadeau !
-#todo présenter le prompt d'onboarding
+https://github.com/ibethus/deleguez-vos-taches-a-l-ia/blob/main/ai-agent-onboarding-prompt.md
 
 [.transparency.no-transition]
 === Merci !
